@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blood Battle Set 1 – Cell Battle Style</title>
+<style>
+:root{
+  --bg0:#05060c;
+  --bg1:#120712;
+  --bg2:#220913;
+  --ink:#fff8fb;
+  --muted:rgba(255,248,251,.78);
+  --pink:#ff7cb7;
+  --pink2:#ffc4dd;
+  --red:#ff4d6d;
+  --red2:#ff7a8e;
+  --gold:#ffe58a;
+  --cyan:#a7f6ff;
+  --green:#67f0a1;
+  --bad:#ff5e7e;
+  --shadow:rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--ink);
+  min-height:100vh;
+  background:
+    radial-gradient(1000px 700px at 10% 8%, rgba(255,124,183,.16), transparent 44%),
+    radial-gradient(1000px 700px at 90% 16%, rgba(255,77,109,.14), transparent 40%),
+    radial-gradient(900px 700px at 50% 100%, rgba(255,229,138,.08), transparent 42%),
+    linear-gradient(180deg,var(--bg0),var(--bg1) 45%,var(--bg2));
+  overflow:hidden;
+  -webkit-text-size-adjust:100%;
+}
+.screen{display:none;width:100vw;height:100dvh;min-height:100vh;padding:10px;overflow:auto}
+.screen.active{display:block}
+.wrap{max-width:1080px;margin:0 auto}
+.brand{display:flex;justify-content:center;margin-top:4px}
+.badge{
+  width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+  font-weight:1000;letter-spacing:.8px;color:#240812;
+  background:linear-gradient(135deg,var(--gold),var(--pink2),var(--red2));
+  box-shadow:0 14px 30px rgba(0,0,0,.25)
+}
+.heroTitle{text-align:center;margin:10px 0 4px;font-size:clamp(30px,4.8vw,58px);line-height:1.01;font-weight:1000}
+.heroTitle .glow{
+  background:linear-gradient(135deg,var(--gold),var(--pink2),var(--red2),var(--pink));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 14px 22px rgba(0,0,0,.35))
+}
+.subtitle{text-align:center;color:var(--muted);font-weight:900;line-height:1.42;font-size:clamp(14px,1.35vw,20px);margin:0 0 12px}
+.card{
+  background:linear-gradient(180deg, rgba(20,13,28,.94), rgba(25,9,20,.90));
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:24px;padding:16px;box-shadow:0 20px 40px var(--shadow)
+}
+input{
+  width:100%;padding:16px 16px;font-size:20px;font-weight:900;border-radius:18px;
+  border:1px solid rgba(255,255,255,.13);outline:none;background:rgba(7,8,17,.55);color:var(--ink)
+}
+.btn,.miniBtn{border:none;cursor:pointer;font-weight:1000;transition:transform .12s ease, filter .12s ease}
+.btn:active,.miniBtn:active,.battleCard:active{transform:translateY(2px)}
+.btn{
+  width:100%;margin-top:12px;padding:16px 18px;border-radius:18px;
+  background:linear-gradient(135deg,var(--gold),var(--pink2),var(--red2));
+  color:#220712;font-size:clamp(18px,1.8vw,24px);
+  box-shadow:0 18px 36px rgba(0,0,0,.32)
+}
+.miniRow{display:flex;gap:8px;flex-wrap:wrap}
+.miniBtn{
+  flex:1 1 200px;padding:11px 12px;border-radius:14px;
+  background:linear-gradient(180deg, rgba(10,13,27,.74), rgba(28,8,18,.68));
+  border:1px solid rgba(255,255,255,.10);color:var(--pink2);font-size:14px;
+  box-shadow:0 12px 24px rgba(0,0,0,.22)
+}
+.howtoList{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.howtoBox{
+  background:linear-gradient(180deg, rgba(13,16,33,.76), rgba(28,8,18,.66));
+  border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:14px
+}
+.howtoBox h3{margin:0 0 8px;color:var(--gold);font-size:20px}
+.howtoBox p{margin:0;font-weight:800;line-height:1.45}
+.goalBanner{
+  margin-top:12px;padding:12px 14px;border-radius:18px;text-align:center;
+  background:linear-gradient(135deg, rgba(255,229,138,.14), rgba(255,124,183,.14));
+  border:1px solid rgba(255,255,255,.10);font-weight:1000
+}
+
+.sparkles,.heartsLayer,.confettiLayer,.emojiLayer,.pulseLayer,.flashLayer{
+  position:fixed;inset:0;pointer-events:none
+}
+.sparkles i{position:absolute;width:7px;height:7px;border-radius:50%;background:rgba(255,229,138,.95);box-shadow:0 0 14px rgba(255,229,138,.65);animation:twinkle 2.8s ease-in-out infinite}
+.sparkles i:nth-child(odd){background:rgba(255,124,183,.95);box-shadow:0 0 14px rgba(255,124,183,.55)}
+@keyframes twinkle{0%,100%{transform:scale(.6);opacity:.25}50%{transform:scale(1.45);opacity:1}}
+.heartsLayer i{
+  position:absolute;width:18px;height:18px;transform:rotate(45deg);
+  background:rgba(255,77,109,.12);animation:floatHeart linear infinite
+}
+.heartsLayer i::before,.heartsLayer i::after{
+  content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:inherit
+}
+.heartsLayer i::before{left:-9px;top:0}
+.heartsLayer i::after{left:0;top:-9px}
+@keyframes floatHeart{
+  0%{transform:translateY(18vh) rotate(45deg) scale(.7);opacity:0}
+  10%{opacity:1}
+  100%{transform:translateY(-120vh) rotate(45deg) scale(1.1);opacity:0}
+}
+@keyframes pulseGlow{
+  0%,100%{box-shadow:0 22px 36px rgba(0,0,0,.34), 0 0 20px rgba(255,124,183,.10), inset 0 0 0 1px rgba(255,255,255,.04)}
+  50%{box-shadow:0 22px 40px rgba(0,0,0,.34), 0 0 32px rgba(255,77,109,.18), inset 0 0 0 1px rgba(255,255,255,.06)}
+}
+@keyframes leftRush{0%{left:-62%;transform:rotate(-8deg) scale(.86)}100%{left:2%;transform:rotate(-2deg) scale(1)}}
+@keyframes rightRush{0%{right:-62%;transform:rotate(8deg) scale(.86)}100%{right:2%;transform:rotate(2deg) scale(1)}}
+@keyframes vsPulse{
+  0%,100%{transform:translateX(-50%) scale(1)}
+  50%{transform:translateX(-50%) scale(1.15)}
+}
+@keyframes popRise{
+  0%{transform:translateY(0) scale(.65);opacity:0}
+  20%{opacity:1}
+  100%{transform:translateY(-70px) scale(1.15);opacity:0}
+}
+@keyframes megaDrop{
+  0%{transform:translateY(-30px) rotate(0deg);opacity:0}
+  10%{opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:.95}
+}
+@keyframes flashIn{
+  0%{opacity:0}
+  35%{opacity:.85}
+  100%{opacity:0}
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
+}
+
+.topZone{display:grid;grid-template-columns:1fr 108px;gap:10px;align-items:start;margin-bottom:10px}
+.topbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.chip{
+  background:linear-gradient(180deg, rgba(9,12,27,.78), rgba(32,10,18,.66));
+  border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:7px 9px;
+  display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 12px 24px rgba(0,0,0,.26);font-size:13px;font-weight:1000;color:var(--muted)
+}
+.chip strong{font-size:16px;color:var(--ink)}
+.timerBox{
+  background:linear-gradient(180deg, rgba(9,12,27,.78), rgba(32,10,18,.66));
+  border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:8px 8px 10px;
+  box-shadow:0 12px 24px rgba(0,0,0,.26);text-align:center
+}
+.timerWheel{
+  width:90px;height:90px;margin:0 auto;border-radius:50%;
+  background:conic-gradient(var(--red) calc(var(--deg,360) * 1deg), rgba(255,255,255,.08) 0);
+  position:relative;display:grid;place-items:center;box-shadow:0 12px 22px rgba(0,0,0,.32)
+}
+.timerWheel::before{
+  content:"";position:absolute;inset:8px;border-radius:50%;
+  background:linear-gradient(180deg, rgba(8,13,25,.96), rgba(32,10,18,.90));
+  border:1px solid rgba(255,255,255,.08)
+}
+.timerNum{position:relative;z-index:1;font-size:30px;font-weight:1000;color:var(--gold)}
+.timerLabel{margin-top:4px;font-size:12px;font-weight:1000;color:var(--muted)}
+
+.thaiBox{
+  background:linear-gradient(135deg, rgba(255,229,138,.16), rgba(255,124,183,.13));
+  border:1px solid rgba(255,255,255,.10);border-radius:22px;padding:18px 20px;text-align:center;
+  font-weight:1000;color:var(--gold);font-size:clamp(26px,3vw,40px);
+  margin-bottom:10px;box-shadow:0 0 25px rgba(255,124,183,.08)
+}
+.battleWrap{position:relative;min-height:340px;overflow:hidden}
+.battleLane{position:relative;min-height:340px}
+.battleCard{
+  position:absolute;width:min(42vw,360px);aspect-ratio:1/1;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:16px;font-size:clamp(24px,2vw,34px);line-height:1.22;font-weight:1000;color:var(--ink);
+  border:2px solid rgba(255,255,255,.14);
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,.22), rgba(255,255,255,0) 28%),
+    radial-gradient(circle at 50% 55%, rgba(255,124,183,.14), rgba(255,124,183,0) 55%),
+    linear-gradient(180deg, rgba(18,20,42,.96), rgba(40,10,24,.92));
+  box-shadow:0 22px 36px rgba(0,0,0,.34), 0 0 24px rgba(255,124,183,.14), inset 0 0 0 1px rgba(255,255,255,.04);
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  animation:pulseGlow 2.2s ease-in-out infinite
+}
+.battleCard:hover{border-color:rgba(255,229,138,.55)}
+.battleCard.left{left:-58%;top:52px;transform:rotate(-5deg)}
+.battleCard.right{right:-58%;top:52px;transform:rotate(5deg)}
+.battleCard.left.enter{animation:leftRush .6s cubic-bezier(.2,.84,.22,1) forwards,pulseGlow 2.2s ease-in-out infinite .6s}
+.battleCard.right.enter{animation:rightRush .6s cubic-bezier(.2,.84,.22,1) forwards,pulseGlow 2.2s ease-in-out infinite .6s}
+.battleCard.correct{
+  border-color:rgba(103,240,161,.92);
+  box-shadow:0 0 0 2px rgba(103,240,161,.20),0 0 34px rgba(103,240,161,.24),0 22px 36px rgba(0,0,0,.34)
+}
+.battleCard.wrong{
+  border-color:rgba(255,94,126,.92);
+  box-shadow:0 0 0 2px rgba(255,94,126,.20),0 0 34px rgba(255,94,126,.24),0 22px 36px rgba(0,0,0,.34)
+}
+.battleCard.dim{opacity:.38;filter:saturate(.7)}
+.cardLabel{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  font-size:18px;padding:6px 14px;border-radius:999px;
+  background:linear-gradient(135deg,var(--gold),var(--pink2));color:#1b1530;
+  box-shadow:0 6px 14px rgba(0,0,0,.25);font-weight:1000
+}
+.cardCore{
+  position:absolute;width:46%;height:46%;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(167,246,255,.18), rgba(255,124,183,.12) 45%, rgba(255,255,255,0) 70%);
+  opacity:.82
+}
+.cardText{position:relative;z-index:2;width:100%}
+.vsOrb{
+  position:absolute;left:50%;top:134px;transform:translateX(-50%);
+  width:110px;height:110px;border-radius:50%;display:grid;place-items:center;
+  font-size:34px;font-weight:1000;color:#220712;
+  background:radial-gradient(circle at 30% 30%, #fff6bc, var(--gold) 45%, var(--pink2));
+  box-shadow:0 16px 30px rgba(0,0,0,.34), 0 0 40px rgba(255,77,109,.28);
+  z-index:5;animation:vsPulse 1s infinite
+}
+.statusText{text-align:center;font-weight:1000;font-size:clamp(16px,1.3vw,20px);color:var(--pink2);margin-top:8px;min-height:28px}
+.comboBadge{
+  position:fixed;left:50%;top:12px;transform:translateX(-50%) scale(.88);
+  background:linear-gradient(135deg,var(--gold),var(--pink2),var(--red2));
+  color:#170f27;border-radius:999px;padding:10px 18px;font-weight:1000;
+  font-size:clamp(16px,2vw,28px);box-shadow:0 16px 34px rgba(0,0,0,.35);
+  opacity:0;pointer-events:none;z-index:120;transition:opacity .18s ease, transform .18s ease
+}
+.comboBadge.show{opacity:1;transform:translateX(-50%) scale(1)}
+.floatEmoji{position:absolute;font-size:52px;animation:popRise .9s ease-out forwards;filter:drop-shadow(0 10px 18px rgba(0,0,0,.28))}
+.bigText{
+  position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) scale(.82);
+  padding:12px 18px;border-radius:18px;
+  background:linear-gradient(135deg, rgba(255,229,138,.18), rgba(255,124,183,.20));
+  border:1px solid rgba(255,255,255,.14);
+  font-size:clamp(26px,4vw,54px);font-weight:1000;color:var(--gold);
+  box-shadow:0 20px 40px rgba(0,0,0,.35);opacity:0;pointer-events:none;z-index:200;
+  transition:opacity .12s ease, transform .12s ease
+}
+.bigText.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.flashLayer.active{
+  background:rgba(255,255,255,.9);
+  animation:flashIn .18s ease-out
+}
+.shake{animation:shake .38s linear}
+.confettiLayer i{position:absolute;top:-20px;width:10px;height:18px;border-radius:8px;opacity:.96;animation:megaDrop linear forwards}
+
+.certificate{
+  position:relative;padding:clamp(18px,2vw,28px);border-radius:28px;
+  background:
+    radial-gradient(circle at 15% 12%, rgba(255,192,203,.22), transparent 24%),
+    radial-gradient(circle at 85% 18%, rgba(255,229,138,.24), transparent 26%),
+    radial-gradient(circle at 50% 100%, rgba(103,240,161,.12), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,248,252,.98));
+  color:#17212f;border:8px double rgba(255,182,193,.8);
+  box-shadow:0 30px 70px rgba(0,0,0,.35), 0 0 36px rgba(255,192,203,.28);overflow:hidden
+}
+.certificate::after{
+  content:"✨  🫀  ✨  🌈  ✨";
+  position:absolute;left:50%;bottom:10px;transform:translateX(-50%);
+  font-size:clamp(18px,2vw,28px);opacity:.9;z-index:1
+}
+.certTop{text-align:center;position:relative;z-index:1}
+.certSeal{
+  width:92px;height:92px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--gold),var(--pink2),var(--red2));color:#08111f;
+  font-size:42px;font-weight:1000;box-shadow:0 18px 34px rgba(0,0,0,.22);border:4px solid rgba(255,255,255,.7)
+}
+.certTitle{font-size:clamp(30px,3.2vw,52px);font-weight:1000;color:#b42342;margin-bottom:4px}
+.certSub{font-size:clamp(15px,1.5vw,22px);font-weight:900;color:#3b4758;margin-bottom:14px}
+.certPlayer{font-size:clamp(22px,2.2vw,34px);font-weight:1000;color:#14532d;margin:10px 0 14px;text-align:center;position:relative;z-index:1}
+.certBigScore{text-align:center;font-size:clamp(54px,5vw,88px);font-weight:1000;color:#b42342;margin:6px 0 0;position:relative;z-index:1}
+.certMini{text-align:center;font-size:clamp(16px,1.4vw,20px);font-weight:900;color:#475569;margin-bottom:14px;position:relative;z-index:1}
+.certGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px;position:relative;z-index:1}
+.certStat{
+  background:rgba(255,255,255,.85);border:2px solid rgba(255,229,138,.65);
+  border-radius:18px;padding:14px 10px;text-align:center;box-shadow:0 12px 22px rgba(0,0,0,.08)
+}
+.certStat .k{font-weight:1000;font-size:clamp(14px,1.2vw,18px);color:#475569;margin-bottom:6px}
+.certStat .v{font-weight:1000;font-size:clamp(24px,2vw,34px);color:#0f172a}
+.certPass{
+  margin:16px auto 8px;width:fit-content;padding:12px 22px;border-radius:999px;
+  font-weight:1000;font-size:clamp(18px,1.8vw,26px);position:relative;z-index:1
+}
+.certPass.pass{background:rgba(34,197,94,.18);color:#166534;border:2px solid rgba(34,197,94,.45)}
+.certPass.fail{background:rgba(239,68,68,.14);color:#991b1b;border:2px solid rgba(239,68,68,.35)}
+.certFooter{text-align:center;margin-top:16px;color:#475569;font-weight:900;font-size:clamp(13px,1.2vw,17px);position:relative;z-index:1}
+.reviewBox{
+  margin-top:14px;background:rgba(255,255,255,.88);border:2px solid rgba(255,182,193,.55);
+  border-radius:18px;padding:14px;color:#17212f;position:relative;z-index:1
+}
+.reviewBox h3{margin:0 0 10px;color:#b42342}
+.reviewList{margin:0;padding-left:20px;text-align:left;font-weight:900;line-height:1.55}
+
+@media (max-width:860px){
+  .howtoList{grid-template-columns:1fr}
+  .topZone{grid-template-columns:1fr 94px;gap:8px}
+}
+@media (max-width:768px){
+  body{overflow:auto}
+  .screen{padding:8px 8px 14px}
+  .badge{width:42px;height:42px;border-radius:12px;font-size:14px}
+  .heroTitle{font-size:clamp(24px,6.2vw,34px);margin:4px 0 2px}
+  .subtitle{font-size:12px;line-height:1.28;margin:0 0 8px}
+  .card{padding:10px;border-radius:18px}
+  .topbar{gap:6px}
+  .chip{min-height:36px;border-radius:12px;padding:5px 7px;font-size:10px;line-height:1.05}
+  .chip strong{font-size:12px}
+  .timerWheel{width:80px;height:80px}
+  .timerWheel::before{inset:7px}
+  .timerNum{font-size:26px}
+  .thaiBox{font-size:22px;padding:14px 12px}
+  .battleWrap,.battleLane{min-height:268px}
+  .battleCard{width:min(45vw,220px);min-width:150px;padding:12px;font-size:18px}
+  .battleCard.left,.battleCard.right{top:46px}
+  .vsOrb{top:110px;width:78px;height:78px;font-size:24px}
+  .statusText{font-size:14px;min-height:24px}
+  .miniBtn{flex:1 1 calc(50% - 6px);padding:9px 8px;border-radius:12px;font-size:12px}
+  .btn{margin-top:8px;padding:12px 12px;border-radius:14px;font-size:17px}
+  .comboBadge{top:8px;width:calc(100vw - 22px);padding:8px 10px;text-align:center;font-size:clamp(14px,4.2vw,20px)}
+  .certGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .certSeal{width:70px;height:70px;font-size:32px}
+  .certTitle{font-size:clamp(22px,6vw,30px)}
+  .certSub{font-size:12px;margin-bottom:8px}
+  .certPlayer{font-size:clamp(18px,5vw,24px);margin:8px 0 10px}
+  .certBigScore{font-size:clamp(40px,11vw,58px)}
+  .certMini{font-size:13px;margin-bottom:10px}
+  .certStat{padding:10px 8px;border-radius:14px}
+  .certStat .k{font-size:12px}
+  .certStat .v{font-size:21px}
+  .certPass{padding:10px 16px;font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="sparkles" aria-hidden="true">
+  <i style="left:12%; top:14%; animation-delay:0s"></i>
+  <i style="left:22%; top:30%; animation-delay:.6s"></i>
+  <i style="left:38%; top:18%; animation-delay:1.2s"></i>
+  <i style="left:54%; top:10%; animation-delay:.3s"></i>
+  <i style="left:72%; top:24%; animation-delay:1.6s"></i>
+  <i style="left:84%; top:12%; animation-delay:.9s"></i>
+  <i style="left:18%; top:72%; animation-delay:1.1s"></i>
+  <i style="left:46%; top:78%; animation-delay:.5s"></i>
+</div>
+<div class="heartsLayer" aria-hidden="true">
+  <i style="left:10%; animation-duration:15s; animation-delay:0s;"></i>
+  <i style="left:26%; animation-duration:12s; animation-delay:1s;"></i>
+  <i style="left:48%; animation-duration:18s; animation-delay:.4s;"></i>
+  <i style="left:68%; animation-duration:14s; animation-delay:1.4s;"></i>
+  <i style="left:86%; animation-duration:17s; animation-delay:.8s;"></i>
+</div>
+<div id="pulseLayer" class="pulseLayer"></div>
+<div id="emojiLayer" class="emojiLayer"></div>
+<div id="confettiLayer" class="confettiLayer"></div>
+<div id="flashLayer" class="flashLayer"></div>
+<div id="comboBadge" class="comboBadge">COMBO x5 +2</div>
+<div id="bigText" class="bigText">PERFECT!</div>
+
+<section id="startScreen" class="screen active">
+  <div class="wrap">
+    <div class="brand"><div class="badge">KP</div></div>
+    <div class="heroTitle"><span class="glow">BLOOD BATTLE</span><br/>PULSE HEART ARENA</div>
+    <div class="subtitle">ระบบหมุนเวียนเลือด • Set 1 • โครง Cell Battle เดิม<br>30 ข้อ • 7 วินาที • TH + EN</div>
+    <div class="card">
+      <div style="font-weight:1000; margin-bottom:8px; font-size:18px;">Player Name</div>
+      <input id="playerNameInput" type="text" placeholder="Type your name..." />
+      <div class="miniRow" style="margin-top:10px;">
+        <button class="miniBtn" onclick="showScreen('howToScreen')">📘 HOW TO PLAY</button>
+      </div>
+      <button class="btn" onclick="startGame()">🚀 START BLOOD BATTLE</button>
+    </div>
+  </div>
+</section>
+
+<section id="howToScreen" class="screen">
+  <div class="wrap">
+    <div class="brand"><div class="badge">KP</div></div>
+    <div class="heroTitle"><span class="glow">HOW TO</span><br>PLAY</div>
+    <div class="subtitle">ตอบให้ทัน • ต้องคิดจริง • เดา A รัว ๆ ไม่ได้แล้ว 😎</div>
+    <div class="card">
+      <div class="howtoList">
+        <div class="howtoBox">
+          <h3>🎯 เนื้อหา</h3>
+          <p>หัวใจ ห้องหัวใจ ลิ้นหัวใจ หลอดเลือด ส่วนประกอบของเลือด และการไหลเวียนเลือดแบบมีสาระ</p>
+        </div>
+        <div class="howtoBox">
+          <h3>⚔️ วิธีเล่น</h3>
+          <p>อ่านโจทย์ภาษาไทย แล้วเลือกคำตอบซ้ายหรือขวาให้ทันภายใน <b>7 วินาที</b> ตำแหน่งคำตอบจะสุ่มใหม่ทุกข้อ</p>
+        </div>
+        <div class="howtoBox">
+          <h3>🫀 Battle Style</h3>
+          <p>การ์ดคำตอบจะพุ่งเข้ามาจากซ้ายและขวาแบบ Cell Battle เดิม พร้อมเอฟเฟกต์ตอบถูก/ผิด</p>
+        </div>
+        <div class="howtoBox">
+          <h3>📊 สรุปผล</h3>
+          <p>มีคะแนนถูก ผิด ข้าม Accuracy ระดับ และหัวข้อที่ควรกลับไปทบทวนแบบครูมืออาชีพ</p>
+        </div>
+      </div>
+      <div class="goalBanner">💡 Goal: เล่นเกมเดียวแล้วเข้าใจระบบหมุนเวียนเลือดแบบแม่นขึ้นจริง</div>
+      <div class="miniRow" style="margin-top:14px;">
+        <button class="miniBtn" onclick="showScreen('startScreen')">⬅ Back</button>
+        <button class="miniBtn" onclick="startGame()">🚀 Start Battle</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gameScreen" class="screen">
+  <div class="wrap">
+    <div class="topZone">
+      <div class="topbar">
+        <div class="chip"><span>Q</span><strong id="qDisplay">1/30</strong></div>
+        <div class="chip"><span>✓</span><strong id="correctDisplay">0</strong></div>
+        <div class="chip"><span>✗</span><strong id="wrongDisplay">0</strong></div>
+        <div class="chip"><span>Score</span><strong id="scoreDisplay">0</strong></div>
+        <div class="chip"><span>P</span><strong id="playerNameDisplay">-</strong></div>
+      </div>
+      <div class="timerBox">
+        <div class="timerWheel" id="timerWheel"><div class="timerNum" id="timerNum">7</div></div>
+        <div class="timerLabel">BLOOD FLOW TIMER</div>
+      </div>
+    </div>
+
+    <div class="thaiBox" id="thaiPrompt">...</div>
+
+    <div class="battleWrap">
+      <div class="battleLane" id="battleLane">
+        <div class="battleCard left" id="choiceLeft" onclick="pickAnswer(0)">
+          <div class="cardLabel">A</div>
+          <div class="cardCore"></div>
+          <div class="cardText" id="textLeft"></div>
+        </div>
+        <div class="battleCard right" id="choiceRight" onclick="pickAnswer(1)">
+          <div class="cardLabel">B</div>
+          <div class="cardCore"></div>
+          <div class="cardText" id="textRight"></div>
+        </div>
+        <div class="vsOrb">VS</div>
+      </div>
+    </div>
+
+    <div class="statusText" id="statusText"></div>
+
+    <div class="card">
+      <div class="miniRow">
+        <button class="miniBtn" onclick="showScreen('howToScreen')">📘 HOW TO PLAY</button>
+        <button class="miniBtn" onclick="resetAll()">🏠 Back to Home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="finalScreen" class="screen">
+  <div class="wrap">
+    <div class="certificate">
+      <div class="certTop">
+        <div class="certSeal">🫀</div>
+        <div class="certTitle">Blood Master Certificate</div>
+        <div class="certSub">Circulatory System • Set 1 • Kru Pai Classroom</div>
+      </div>
+      <div class="certPlayer" id="finalName">Awarded to: -</div>
+      <div class="certBigScore" id="finalScore">0</div>
+      <div class="certMini" id="finalMini">Mission Score Sheet</div>
+
+      <div class="certGrid">
+        <div class="certStat"><div class="k">Correct</div><div class="v" id="finalCorrect">0</div></div>
+        <div class="certStat"><div class="k">Wrong</div><div class="v" id="finalWrong">0</div></div>
+        <div class="certStat"><div class="k">Skipped</div><div class="v" id="finalSkipped">0</div></div>
+        <div class="certStat"><div class="k">Accuracy</div><div class="v" id="finalAccuracy">0%</div></div>
+      </div>
+
+      <div id="passBadge" class="certPass pass">PASS ✅</div>
+
+      <div class="certGrid" style="margin-top:10px;">
+        <div class="certStat"><div class="k">Rank</div><div class="v" id="finalRank">A</div></div>
+        <div class="certStat"><div class="k">Level</div><div class="v" id="finalLevel">Blood Master</div></div>
+        <div class="certStat"><div class="k">Mode</div><div class="v">BATTLE</div></div>
+        <div class="certStat"><div class="k">Speed</div><div class="v">7s</div></div>
+      </div>
+
+      <div class="reviewBox">
+        <h3>🧠 หัวข้อที่ควรทบทวน</h3>
+        <ul id="reviewList" class="reviewList"></ul>
+      </div>
+
+      <div class="certFooter" id="finalFooter">Smart Kids. Smart Learning. Champions are trained here.</div>
+
+      <div class="miniRow" style="margin-top:18px; position:relative; z-index:1;">
+        <button class="miniBtn" onclick="replayAll()">🎮 Play Again</button>
+        <button class="miniBtn" onclick="resetAll()">🏠 Back to Home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+const QUESTIONS = [
+  {th:"ห้องใดของหัวใจทำหน้าที่สูบฉีดเลือดไปเลี้ยงทั่วร่างกาย", correct:"Left ventricle", wrong:"Right ventricle", topic:"ห้องหัวใจ"},
+  {th:"ห้องใดของหัวใจรับเลือดที่มีออกซิเจนจากปอด", correct:"Left atrium", wrong:"Right atrium", topic:"ห้องหัวใจ"},
+  {th:"ห้องใดมีเลือดเสีย (มี CO₂ สูง) มากที่สุด", correct:"Right atrium", wrong:"Left atrium", topic:"ห้องหัวใจ"},
+  {th:"ลิ้นหัวใจชนิดใดอยู่ระหว่าง Left atrium และ Left ventricle", correct:"Bicuspid valve", wrong:"Tricuspid valve", topic:"ลิ้นหัวใจ"},
+  {th:"ลิ้นหัวใจชนิดใดอยู่ระหว่าง Right atrium และ Right ventricle", correct:"Tricuspid valve", wrong:"Bicuspid valve", topic:"ลิ้นหัวใจ"},
+  {th:"หลอดเลือดแดงใหญ่ที่ออกจากหัวใจเรียกว่าอะไร", correct:"Aorta", wrong:"Vena cava", topic:"หลอดเลือด"},
+  {th:"หลอดเลือดใดนำเลือดกลับเข้าสู่หัวใจ", correct:"Vein", wrong:"Artery", topic:"หลอดเลือด"},
+  {th:"หลอดเลือดใดมีผนังหนาที่สุด", correct:"Artery", wrong:"Vein", topic:"หลอดเลือด"},
+  {th:"หลอดเลือดใดมีลิ้นเพื่อป้องกันการไหลย้อน", correct:"Vein", wrong:"Artery", topic:"หลอดเลือด"},
+  {th:"หลอดเลือดใดเกิดการแลกเปลี่ยนสารกับเซลล์", correct:"Capillary", wrong:"Artery", topic:"หลอดเลือด"},
+  {th:"ส่วนประกอบใดของเลือดมีปริมาณมากที่สุด", correct:"Plasma", wrong:"Red blood cells", topic:"ส่วนประกอบของเลือด"},
+  {th:"สารใดในเม็ดเลือดแดงช่วยจับออกซิเจน", correct:"Hemoglobin", wrong:"Glucose", topic:"ส่วนประกอบของเลือด"},
+  {th:"เม็ดเลือดขาวมีหน้าที่หลักคืออะไร", correct:"กำจัดเชื้อโรค", wrong:"ขนส่งออกซิเจน", topic:"ส่วนประกอบของเลือด"},
+  {th:"เกล็ดเลือดมีบทบาทสำคัญในกระบวนการใด", correct:"การแข็งตัวของเลือด", wrong:"การลำเลียงออกซิเจน", topic:"ส่วนประกอบของเลือด"},
+  {th:"Plasma มีหน้าที่สำคัญคืออะไร", correct:"ลำเลียงสารต่าง ๆ", wrong:"สร้างฮอร์โมน", topic:"ส่วนประกอบของเลือด"},
+  {th:"เลือดจากร่างกายเข้าสู่หัวใจผ่านห้องใดก่อน", correct:"Right atrium", wrong:"Left ventricle", topic:"การไหลเวียนเลือด"},
+  {th:"เลือดจากหัวใจไปปอดผ่านห้องใด", correct:"Right ventricle", wrong:"Left ventricle", topic:"การไหลเวียนเลือด"},
+  {th:"เลือดจากปอดกลับเข้าสู่หัวใจผ่านห้องใด", correct:"Left atrium", wrong:"Right atrium", topic:"การไหลเวียนเลือด"},
+  {th:"เลือดที่มีออกซิเจนสูงจะถูกส่งออกจากหัวใจผ่านห้องใด", correct:"Left ventricle", wrong:"Right ventricle", topic:"การไหลเวียนเลือด"},
+  {th:"การไหลเวียนเลือดแบบวงจรใหญ่เริ่มจากห้องใด", correct:"Left ventricle", wrong:"Right atrium", topic:"การไหลเวียนเลือด"},
+  {th:"หากลิ้นหัวใจรั่ว จะเกิดผลกระทบหลักอะไร", correct:"เลือดไหลย้อน", wrong:"เลือดหยุดไหล", topic:"วิเคราะห์"},
+  {th:"ถ้าเม็ดเลือดแดงลดลง จะเกิดอะไร", correct:"ขาดออกซิเจน", wrong:"ภูมิคุ้มกันลดลง", topic:"วิเคราะห์"},
+  {th:"ถ้าเกล็ดเลือดต่ำ จะเกิดผลใด", correct:"เลือดหยุดยาก", wrong:"หายใจลำบาก", topic:"วิเคราะห์"},
+  {th:"หากหลอดเลือดอุดตัน จะเกิดอะไร", correct:"เลือดไหลเวียนผิดปกติ", wrong:"เลือดเพิ่มขึ้น", topic:"วิเคราะห์"},
+  {th:"อวัยวะใดทำหน้าที่แลกเปลี่ยนแก๊สกับเลือด", correct:"ปอด", wrong:"ตับ", topic:"วิเคราะห์"},
+  {th:"เลือดที่ออกจาก Right ventricle จะไปที่ใด", correct:"ปอด", wrong:"สมอง", topic:"การไหลเวียนเลือด"},
+  {th:"เลือดจาก Vena cava เข้าสู่ห้องใด", correct:"Right atrium", wrong:"Left atrium", topic:"การไหลเวียนเลือด"},
+  {th:"Aorta เชื่อมต่อกับห้องใด", correct:"Left ventricle", wrong:"Right ventricle", topic:"หลอดเลือด"},
+  {th:"ระบบหมุนเวียนเลือดของมนุษย์เป็นแบบใด", correct:"Double circulation", wrong:"Single circulation", topic:"ภาพรวมระบบ"},
+  {th:"เหตุใดผนังของ Left ventricle จึงหนาที่สุด", correct:"ต้องสูบเลือดไปทั่วร่างกาย", wrong:"ต้องรับเลือดจากปอด", topic:"ห้องหัวใจ"}
+];
+
+let playerName="", qIndex=0, correct=0, wrong=0, skipped=0, score=0, timer=null, timeLeft=7, answered=false, streak=0;
+let currentCorrectSide = 0;
+const wrongTopics = {};
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+function ensureAudio(){
+  if(!window.audioCtx){
+    window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(window.audioCtx.state === "suspended") window.audioCtx.resume();
+}
+function tone(freq=440,dur=0.08,type="sine",gain=0.04){
+  ensureAudio();
+  const t0=window.audioCtx.currentTime, osc=window.audioCtx.createOscillator(), g=window.audioCtx.createGain();
+  osc.type=type; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(gain,t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  osc.connect(g); g.connect(window.audioCtx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+function sfxCorrect(){ tone(784,0.08,"sine",0.05); setTimeout(()=>tone(988,0.09,"sine",0.05),70); setTimeout(()=>tone(1175,0.1,"sine",0.05),140); }
+function sfxWrong(){ tone(220,0.14,"square",0.05); setTimeout(()=>tone(180,0.16,"square",0.05),110); }
+function sfxTick(){ tone(520,0.05,"triangle",0.022); }
+function sfxPulse(){ tone(145,0.08,"sine",0.02); setTimeout(()=>tone(182,0.05,"sine",0.018),110); }
+function sfxWin(){ [784,988,1175,1318,1568].forEach((f,i)=>setTimeout(()=>tone(f,0.14,"triangle",0.05), i*80)); }
+
+function updateTopBar(){
+  document.getElementById("qDisplay").textContent = `${qIndex+1}/30`;
+  document.getElementById("correctDisplay").textContent = correct;
+  document.getElementById("wrongDisplay").textContent = wrong;
+  document.getElementById("scoreDisplay").textContent = score;
+  document.getElementById("playerNameDisplay").textContent = playerName || "-";
+}
+function updateTimer(){
+  document.getElementById("timerNum").textContent = timeLeft;
+  const deg = Math.max(0, (timeLeft/7)*360);
+  document.getElementById("timerWheel").style.setProperty("--deg", deg);
+}
+function showCombo(text){
+  const el=document.getElementById("comboBadge");
+  el.textContent=text;
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),900);
+}
+function burstEmoji(emoji){
+  const layer=document.getElementById("emojiLayer");
+  for(let i=0;i<3;i++){
+    const e=document.createElement("div");
+    e.className="floatEmoji";
+    e.textContent=emoji;
+    e.style.left=(44+Math.random()*14)+"%";
+    e.style.top=(44+Math.random()*10)+"%";
+    layer.appendChild(e);
+    setTimeout(()=>e.remove(),900);
+  }
+}
+function confettiBurst(amount=70){
+  const layer=document.getElementById("confettiLayer");
+  const colors=["#ffe58a","#ff7cb7","#ffffff","#ff4d6d","#ffc4dd","#a7f6ff"];
+  for(let i=0;i<amount;i++){
+    const c=document.createElement("i");
+    c.style.left=((i*7+Math.random()*8)%100)+"%";
+    c.style.background=colors[i%colors.length];
+    c.style.animationDuration=(1.8+(i%7)*0.16)+"s";
+    c.style.animationDelay=((i%10)*0.03)+"s";
+    c.style.transform="rotate("+((i*19)%360)+"deg)";
+    layer.appendChild(c);
+    setTimeout(()=>c.remove(),2600);
+  }
+}
+function flashScreen(){
+  const flash = document.getElementById("flashLayer");
+  flash.classList.remove("active");
+  void flash.offsetWidth;
+  flash.classList.add("active");
+  setTimeout(()=>flash.classList.remove("active"),180);
+}
+function shakeBattle(){
+  const lane=document.getElementById("battleLane");
+  lane.classList.remove("shake");
+  void lane.offsetWidth;
+  lane.classList.add("shake");
+  setTimeout(()=>lane.classList.remove("shake"),400);
+}
+function bigText(text){
+  const el=document.getElementById("bigText");
+  el.textContent=text;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),520);
+}
+function countWrongTopic(topic){
+  wrongTopics[topic] = (wrongTopics[topic] || 0) + 1;
+}
+function topReviewTopics(){
+  const entries = Object.entries(wrongTopics).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  if(!entries.length) return ["ทำได้ดีมาก รอบนี้ยังไม่มีหัวข้อที่พลาดเด่นชัด"];
+  return entries.map(([topic,count])=>`${topic} (${count} ข้อ)`);
+}
+function markCards(lock=true){
+  document.querySelectorAll(".battleCard").forEach(el=>{
+    if(lock){
+      el.style.pointerEvents="none";
+    }else{
+      el.style.pointerEvents="auto";
+      el.classList.remove("correct","wrong","dim","enter");
+    }
+  });
+}
+function startGame(){
+  const name=document.getElementById("playerNameInput").value.trim();
+  if(!name){
+    document.getElementById("playerNameInput").focus();
+    return;
+  }
+  playerName=name;
+  qIndex=0; correct=0; wrong=0; skipped=0; score=0; streak=0;
+  Object.keys(wrongTopics).forEach(k=>delete wrongTopics[k]);
+  showScreen("gameScreen");
+  loadQuestion();
+}
+function resetAll(){
+  clearInterval(timer);
+  document.getElementById("playerNameInput").value="";
+  playerName="";
+  showScreen("startScreen");
+}
+function shuffleOptions(q){
+  const correctFirst = Math.random() < 0.5;
+  if(correctFirst){
+    currentCorrectSide = 0;
+    return [q.correct, q.wrong];
+  }else{
+    currentCorrectSide = 1;
+    return [q.wrong, q.correct];
+  }
+}
+function loadQuestion(){
+  answered=false;
+  clearInterval(timer);
+  const q = QUESTIONS[qIndex];
+  const options = shuffleOptions(q);
+
+  document.getElementById("thaiPrompt").textContent = q.th;
+  document.getElementById("textLeft").textContent = options[0];
+  document.getElementById("textRight").textContent = options[1];
+  document.getElementById("statusText").textContent = "";
+
+  markCards(false);
+  const left=document.getElementById("choiceLeft"), right=document.getElementById("choiceRight");
+  void left.offsetWidth; void right.offsetWidth;
+  left.classList.add("enter"); right.classList.add("enter");
+
+  updateTopBar();
+  timeLeft=7; updateTimer(); sfxPulse();
+
+  timer=setInterval(()=>{
+    timeLeft--;
+    sfxPulse();
+    if(timeLeft<=3 && timeLeft>0) sfxTick();
+    updateTimer();
+    if(timeLeft<=0){
+      clearInterval(timer);
+      if(!answered){
+        answered=true;
+        skipped++;
+        streak=0;
+        countWrongTopic(q.topic);
+        document.getElementById("statusText").textContent="⏱ หมดเวลา! ไปข้อถัดไป";
+        burstEmoji("💔");
+        shakeBattle();
+        setTimeout(nextQuestion,700);
+      }
+    }
+  },1000);
+}
+function pickAnswer(side){
+  if(answered) return;
+  answered=true;
+  clearInterval(timer);
+
+  const q = QUESTIONS[qIndex];
+  const left=document.getElementById("choiceLeft");
+  const right=document.getElementById("choiceRight");
+  markCards(true);
+
+  const chosen = side===0 ? left : right;
+  const correctCard = currentCorrectSide===0 ? left : right;
+  const otherCard = currentCorrectSide===0 ? right : left;
+
+  if(side === currentCorrectSide){
+    correct++;
+    score++;
+    streak++;
+    chosen.classList.add("correct");
+    otherCard.classList.add("dim");
+    document.getElementById("statusText").textContent="🫀 BLOOD POWER!";
+    flashScreen();
+    confettiBurst(52);
+    burstEmoji("❤️");
+    bigText("PERFECT!");
+    sfxCorrect();
+    if(streak % 5 === 0){
+      score += 2;
+      showCombo(`COMBO x${streak} +2`);
+    }
+  }else{
+    wrong++;
+    streak=0;
+    countWrongTopic(q.topic);
+    chosen.classList.add("wrong");
+    correctCard.classList.add("correct");
+    otherCard.classList.add("dim");
+    document.getElementById("statusText").textContent="💔 HEART BREAK!";
+    shakeBattle();
+    burstEmoji("💔");
+    bigText("BOOM!");
+    sfxWrong();
+  }
+
+  updateTopBar();
+  setTimeout(nextQuestion,900);
+}
+function nextQuestion(){
+  qIndex++;
+  if(qIndex >= QUESTIONS.length){
+    endGame();
+  }else{
+    loadQuestion();
+  }
+}
+function endGame(){
+  clearInterval(timer);
+  const accuracy = Math.round((correct/QUESTIONS.length)*100);
+
+  let rank="C", level="Need Practice", footer="ควรทบทวนแล้วลองใหม่อีกครั้งนะ";
+  if(correct >= 26){ rank="S"; level="Blood Master"; footer="ยอดเยี่ยมมาก เข้าใจระบบหมุนเวียนเลือดได้แน่นแล้ว"; }
+  else if(correct >= 20){ rank="A"; level="Heart Warrior"; footer="ดีมาก เหลือเก็บรายละเอียดอีกนิดจะโหดมาก"; }
+  else if(correct >= 15){ rank="B"; level="Pulse Fighter"; footer="พื้นฐานมาแล้ว แต่ยังต้องทบทวนบางจุด"; }
+
+  showScreen("finalScreen");
+  document.getElementById("finalName").textContent = `Awarded to: ${playerName}`;
+  document.getElementById("finalScore").textContent = `${score}`;
+  document.getElementById("finalMini").textContent = `Mission Score Sheet • Correct ${correct}/30`;
+  document.getElementById("finalCorrect").textContent = correct;
+  document.getElementById("finalWrong").textContent = wrong;
+  document.getElementById("finalSkipped").textContent = skipped;
+  document.getElementById("finalAccuracy").textContent = `${accuracy}%`;
+  document.getElementById("finalRank").textContent = rank;
+  document.getElementById("finalLevel").textContent = level;
+  document.getElementById("finalFooter").textContent = footer;
+
+  const pass = correct >= 20;
+  const badge=document.getElementById("passBadge");
+  badge.textContent = pass ? "PASS ✅" : "KEEP TRAINING 💪";
+  badge.className = pass ? "certPass pass" : "certPass fail";
+
+  const reviewList = document.getElementById("reviewList");
+  reviewList.innerHTML = "";
+  topReviewTopics().forEach(item=>{
+    const li=document.createElement("li");
+    li.textContent=item;
+    reviewList.appendChild(li);
+  });
+
+  if(pass){
+    confettiBurst(150);
+    sfxWin();
+  }
+}
+function replayAll(){
+  qIndex=0; correct=0; wrong=0; skipped=0; score=0; streak=0;
+  Object.keys(wrongTopics).forEach(k=>delete wrongTopics[k]);
+  showScreen("gameScreen");
+  loadQuestion();
+}
+</script>
+</body>
+</html>
